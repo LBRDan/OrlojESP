@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrlojESP Settings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-top: 10px;
+        }
+
+        input,
+        select {
+            margin-bottom: 10px;
+        }
+
+        button {
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>OrlojESP Settings</h1>
+    <form id="settingsForm">
+        <h2>WiFi Settings</h2>
+        <label for="wifi-ssid">WiFi SSID:</label>
+        <input type="text" id="wifi-ssid" name="wifi-ssid" required>
+
+        <label for="wifi-password">WiFi Password:</label>
+        <input type="password" id="wifi-password" name="wifi-password" required>
+
+        <h2>Clock Settings</h2>
+        <label for="use-ntp">
+            <input type="checkbox" id="use-ntp" name="use-ntp">
+            Use NTP
+        </label>
+
+        <label for="timezone">Timezone:</label>
+        <select id="timezone" name="timezone">
+            <!--PLACEHOLDER-->
+            <!-- Add more timezone options as needed -->
+        </select>
+
+        <div id="manual-time">
+            <label for="manual-datetime">Set Date and Time:</label>
+            <input type="datetime-local" id="manual-datetime" name="manual-datetime">
+        </div>
+
+        <h2>Alarm Settings</h2>
+        <label for="enable-alarm">
+            <input type="checkbox" id="enable-alarm" name="enable-alarm">
+            Enable Alarm
+        </label>
+
+        <div id="alarm-settings">
+            <label for="alarm-time">Alarm Time:</label>
+            <input type="time" id="alarm-time" name="alarm-time">
+
+            <h3>Repeat on:</h3>
+            <label>
+                <input type="checkbox" id="select-all">
+                Select/Deselect All
+            </label>
+            <div id="weekdays">
+                <label><input type="checkbox" name="weekdays[]" value="0"> Sunday</label>
+                <label><input type="checkbox" name="weekdays[]" value="1"> Monday</label>
+                <label><input type="checkbox" name="weekdays[]" value="2"> Tuesday</label>
+                <label><input type="checkbox" name="weekdays[]" value="3"> Wednesday</label>
+                <label><input type="checkbox" name="weekdays[]" value="4"> Thursday</label>
+                <label><input type="checkbox" name="weekdays[]" value="5"> Friday</label>
+                <label><input type="checkbox" name="weekdays[]" value="6"> Saturday</label>
+            </div>
+        </div>
+
+        <button type="submit">Save Settings</button>
+    </form>
+
+    <div id="message"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('settingsForm');
+            const useNTP = document.getElementById('use-ntp');
+            const manualTime = document.getElementById('manual-time');
+            const enableAlarm = document.getElementById('enable-alarm');
+            const alarmSettings = document.getElementById('alarm-settings');
+            const selectAll = document.getElementById('select-all');
+            const weekdays = document.querySelectorAll('input[name="weekdays[]"]');
+
+            // Toggle manual time input based on NTP checkbox
+            useNTP.addEventListener('change', function () {
+                manualTime.classList.toggle('hidden', this.checked);
+            });
+
+            // Toggle alarm settings based on enable alarm checkbox
+            enableAlarm.addEventListener('change', function () {
+                alarmSettings.classList.toggle('hidden', !this.checked);
+            });
+
+            // Handle select/deselect all weekdays
+            selectAll.addEventListener('change', function () {
+                weekdays.forEach(day => day.checked = this.checked);
+            });
+
+            // Form submission
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                fetch('/save-settings', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.text())
+                    .then(message => {
+                        document.getElementById('message').textContent = message;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('message').textContent = 'An error occurred while saving settings.';
+                    });
+            });
+
+            // Load current settings
+            fetch('/get-settings')
+                .then(response => response.json())
+                .then(settings => {
+                    document.getElementById('wifi-ssid').value = settings.wifiSSID || '';
+                    document.getElementById('wifi-password').value = settings.wifiPassword || '';
+                    useNTP.checked = settings.useNTP;
+                    document.getElementById('timezone').value = settings.timezone;
+                    document.getElementById('manual-datetime').value = new Date(settings.manualTime * 1000).toISOString().slice(0, 16);
+                    enableAlarm.checked = settings.alarmEnabled;
+                    document.getElementById('alarm-time').value = new Date(settings.alarmTime * 1000).toTimeString().slice(0, 5);
+                    settings.weekdays.forEach((day, index) => {
+                        weekdays[index].checked = day;
+                    });
+                    useNTP.dispatchEvent(new Event('change'));
+                    enableAlarm.dispatchEvent(new Event('change'));
+                })
+                .catch(error => {
+                    console.error('Error loading settings:', error);
+                });
+        });
+    </script>
+</body>
+
+</html>
