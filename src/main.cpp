@@ -18,10 +18,6 @@
 // 2.9'' EPD Module
 GxEPD2_BW<GxEPD2_290_BS, GxEPD2_290_BS::HEIGHT> display(GxEPD2_290_BS(/*CS=5*/ 5, /*DC=*/0, /*RST=*/2, /*BUSY=*/15)); // DEPG0290BS 128x296, SSD1680
 
-// WiFi credentials
-// const char *ssid = "Vodafone-C01330180";
-// const char *password = "N6AEnxhJgf7csYP4";
-
 // Global variable to track if a restart is pending
 bool restartPending = false;
 unsigned long restartTime = 0;

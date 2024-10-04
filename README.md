@@ -2,11 +2,14 @@
 
 A "smart" ESP32 based 2.9 inches e-paper bedside clock with 24 hours ahead weather forecast
 
+# Image of the project:
+![OrlojESP](./images/orlojesp_front.png)
+
 Target features:
 - [x] Configurable WiFi connection via AP mode
 - [x] Time and date display
 - [x] Time and date synchronization via NTP (with timezone support) when connected to WiFi
-- [-] Web interface for configuration
+- [ ] Web interface for configuration
 - [ ] Front light
 - [ ] 24 hours ahead Weather forecast (with weather alerts)
 - [ ] Lithium battery powered (with charging control and low battery signal, battery level display and load sharing)
